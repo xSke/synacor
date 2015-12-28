@@ -8,9 +8,9 @@ use super::instructions::Instruction::*;
 #[derive(Debug)]
 pub struct CPU {
     memory: Vec<u16>,
-    registers: Vec<u16>,
+    pub registers: Vec<u16>,
     stack: Vec<u16>,
-    pc: u16,
+    pub pc: u16,
     pub running: bool
 }
 
