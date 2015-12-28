@@ -2,3 +2,6 @@
 name = "synacor"
 version = "0.1.0"
 authors = ["Voltasalt <voltasalt@gmail.com>"]
+
+[dependencies]
+byteorder = "0.4.2"
