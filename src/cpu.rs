@@ -1,17 +1,20 @@
 extern crate byteorder;
 
+use std::char;
 use std::fs::{File};
+use std::io::{Write};
 use byteorder::{LittleEndian, ReadBytesExt};
-use super::instructions::Instruction;
-use super::instructions::Instruction::*;
 
-#[derive(Debug)]
+use instructions::Instruction;
+
+#[derive(Clone)]
 pub struct CPU {
-    memory: Vec<u16>,
+    pub memory: Vec<u16>,
     pub registers: Vec<u16>,
-    stack: Vec<u16>,
+    pub stack: Vec<u16>,
     pub pc: u16,
-    pub running: bool
+    pub running: bool,
+    pub input_buffer: String
 }
 
 impl CPU {
@@ -21,7 +24,8 @@ impl CPU {
             registers: vec![0; 8],
             stack: Vec::new(),
             pc: 0,
-            running: true
+            running: true,
+            input_buffer: String::new()
         }
     }
 
@@ -33,9 +37,9 @@ impl CPU {
         }
     }
 
-    fn execute_next(&mut self) {
+    pub fn execute_next(&mut self) {
         let opcode_val = self.memory[self.pc as usize];
-        let opcode = Instruction::from_opcode(opcode_val);
+        let opcode = Instruction::from_opcode(opcode_val).expect(&format!("Invalid opcode {}", opcode_val));
         let arity = opcode.arity();
 
         let args = self.memory[self.pc as usize + 1..self.pc as usize + 1 + arity as usize].to_vec();
@@ -51,6 +55,37 @@ impl CPU {
             32768...32775 => self.registers[value as usize - 32768],
             _ => panic!(format!("Invalid literal value {}", value))
         }
+    }
+
+    pub fn dis(&mut self, file: &mut File) {
+        let mut pc = 0;
+        while pc < 32768 {
+            let opcode_val = self.memory[pc as usize];
+            match Instruction::from_opcode(opcode_val) {
+                Some(opcode) => {
+                    let arity = opcode.arity();
+
+                    let args = self.memory[pc as usize + 1..pc as usize + 1 + arity as usize].to_vec();
+
+                    let args_str = args.iter()
+                    .map(|x| {
+                        match *x {
+                            0...32767 => format!("{}", x),
+                            32768...32775 => format!("#{}", ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'][*x as usize - 32768]),
+                            _ => format!("")
+                        }
+                    }).collect::<Vec<_>>().join(&", ".to_string());
+                    let val = &format!("[{}] {:?}: {}\r\n", pc, opcode, args_str).into_bytes();
+                    file.write_all(val).unwrap();
+
+                    pc += arity + 1;
+                },
+                None => {
+                    pc += 1;
+                }
+            }
+        }
+        file.sync_all().unwrap();
     }
 
     pub fn run(&mut self) {
