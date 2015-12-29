@@ -12,7 +12,7 @@ fn main() {
     cpu.load_from_file(&mut File::open("challenge.bin").unwrap());
 
     println!(" - Dumping bytecode...");
-    cpu.dis(&mut File::create("dis.txt").unwrap());
+    cpu.dis(&mut File::create("disassembly.txt").unwrap());
 
     let sf = File::open("script.txt");
     if let Ok(mut file) = sf {
@@ -35,5 +35,4 @@ fn main() {
     cpu.run();
 
     println!(" - Program finished!");
-    println!(" - Remember to reverse the final code (including b/d, etc!)");
 }
