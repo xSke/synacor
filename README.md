@@ -9,6 +9,8 @@ Synacor Challenge
 
 Remember to reverse the final code (including d/b's!)
 
+It'll default to using the predefined script. Simply rename or delete `script.txt` for fully interactive goodness.
+
 # Commands
     "hack teleporter" - Run this just before using the teleporter to bring you to the second location
     "save" - Save the VM state
