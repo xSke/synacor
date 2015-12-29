@@ -1,6 +1,5 @@
 extern crate byteorder;
 
-use std::char;
 use std::fs::{File};
 use std::io::{Write};
 use byteorder::{LittleEndian, ReadBytesExt};
@@ -14,7 +13,8 @@ pub struct CPU {
     pub stack: Vec<u16>,
     pub pc: u16,
     pub running: bool,
-    pub input_buffer: String
+    pub input_buffer: String,
+    pub saved: Option<Box<CPU>>
 }
 
 impl CPU {
@@ -25,7 +25,8 @@ impl CPU {
             stack: Vec::new(),
             pc: 0,
             running: true,
-            input_buffer: String::new()
+            input_buffer: String::new(),
+            saved: None
         }
     }
 
@@ -54,6 +55,41 @@ impl CPU {
             0...32767 => value,
             32768...32775 => self.registers[value as usize - 32768],
             _ => panic!(format!("Invalid literal value {}", value))
+        }
+    }
+
+    pub fn command(&mut self, string: &String) -> bool {
+        match string.trim() {
+            "hack teleporter" => {
+                // Magic value, determined using "teleport.c"
+                let value = 25734;
+
+                self.registers[7] = value;
+                self.memory[6027] = 1;
+                self.memory[6028] = 32769;
+                self.memory[6029] = 32775;
+                self.memory[6030] = 1;
+                self.memory[6031] = 32768;
+                self.memory[6032] = 6;
+                self.memory[6033] = 21;
+
+                true
+            },
+            "save" => {
+                self.saved = Some(Box::new(self.clone()));
+                true
+            },
+            "load" => {
+                let s = self.saved.take().unwrap();
+                self.pc = s.pc;
+                self.memory = s.memory.clone();
+                self.registers = s.registers.clone();
+                self.stack = s.stack.clone();
+
+                self.saved = None;
+                true
+            }
+            _ => false
         }
     }
 

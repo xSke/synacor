@@ -218,7 +218,8 @@ impl Instruction {
                         next_line.to_string()
                     };
 
-                    if super::command(cpu, &string) {
+                    if cpu.command(&string) {
+                        println!(" - Executed command -");
                         cpu.input_buffer = cpu.input_buffer[string.len()..].to_string();
                     } else {
                         break;

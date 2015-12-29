@@ -1,3 +1,5 @@
+take tablet
+use tablet
 doorway
 north
 north
@@ -49,6 +51,9 @@ use concave coin
 use corroded coin
 north
 take teleporter
+save
+use teleporter
+load
 hack teleporter
 use teleporter
 north
